@@ -22,4 +22,5 @@ public class SQLEquals implements SQLFilter {
     public String toString() {
         return getField() + " = ?";
     }
+
 }

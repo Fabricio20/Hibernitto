@@ -1,6 +1,7 @@
 package net.notfab.persistengine;
 
-import net.notfab.persistengine.entities.*;
+import net.notfab.persistengine.entities.SQLFilter;
+import net.notfab.persistengine.entities.SQLWhere;
 import org.hibernate.internal.SessionImpl;
 
 import javax.persistence.EntityManager;
@@ -9,33 +10,29 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import java.util.List;
 
-@SuppressWarnings({"unchecked", "SqlNoDataSourceInspection"})
-public class PersistEngine {
+@SuppressWarnings({"WeakerAccess", "unchecked", "SqlDialectInspection"})
+public class PersistEngine implements AutoCloseable {
 
-    private static PersistEngine Instance;
     private EntityManager em;
 
-    public PersistEngine(String name) {
-        Instance = this;
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory(name);
-        this.em = emf.createEntityManager();
-    }
-
-    public static PersistEngine getInstance() {
-        return Instance;
+    protected PersistEngine(EntityManager em) {
+        this.em = em;
     }
 
     /**
      * Inserts or updates an object.
      * @param object The object.
      */
-    public void persist(Object object) {
-        em.getTransaction().begin();
-        ((SessionImpl) em).saveOrUpdate(object);
-        em.getTransaction().commit();
+    public boolean persist(Object object) {
+        try {
+            em.getTransaction().begin();
+            ((SessionImpl) em).saveOrUpdate(object);
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
-
-    // --------------------------------------------------
 
     /**
      * Fetches a persisted entity from the database.
@@ -54,13 +51,20 @@ public class PersistEngine {
         return resp;
     }
 
+    /**
+     * Fetches a persisted entity from the database.
+     * @param clazz Class of the entity
+     * @param where SQLWhere object (filter).
+     * @param <T> Type
+     * @return Entity from DB
+     */
     public <T> T get(Class<T> clazz, SQLWhere where) {
         String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
         where.prepare(query);
         query.setFirstResult(0);
         query.setMaxResults(1);
-        return (T) query.getSingleResult();
+        return query.getResultList().isEmpty() ? null : (T) query.getResultList().get(0);
     }
 
     /**
@@ -77,11 +81,18 @@ public class PersistEngine {
         where.prepare(query);
         query.setFirstResult(0);
         query.setMaxResults(1);
-        return (T) query.getSingleResult();
+        return query.getResultList().isEmpty() ? null : (T) query.getResultList().get(0);
     }
 
     // --------------------------------------------------
 
+    /**
+     * Fetches a list of persisted entities from the database with filters.
+     * @param clazz Class of the entity
+     * @param where SQLWhere object (filter).
+     * @param <T> Type
+     * @return Persisted list of entities if found, null otherwise.
+     */
     public <T> List<T> getList(Class<T> clazz, SQLWhere where) {
         String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
@@ -115,7 +126,7 @@ public class PersistEngine {
     public void delete(Object object) {
         if(object == null) return;
         em.getTransaction().begin();
-        em.remove(object);
+        em.remove(em.merge(object));
         em.getTransaction().commit();
     }
 

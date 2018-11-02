@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+group 'net.notfab.persistengine'
+version '1.0'
+description 'Persistence Engine'
+
+sourceCompatibility = targetCompatibility = 10
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    baseName = project.name
+    manifest {
+        attributes 'Implementation-Version': version
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "/repository/Hosted"
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId rootProject.name
+            version version
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://maven.notfab.net/SpigotMC" }
+}
+
+dependencies {
+    compileOnly group: 'org.hibernate', name: 'hibernate-hikaricp', version:'5.2.17.Final'
+}

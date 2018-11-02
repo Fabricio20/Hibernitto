@@ -1,11 +1,11 @@
 package net.notfab.persistengine.entities;
 
-public class SQLLike implements SQLFilter {
+public class SQLNot implements SQLFilter {
 
     private String field;
     private String value;
 
-    public SQLLike(String field, String value) {
+    public SQLNot(String field, String value) {
         this.field = field;
         this.value = value;
     }
@@ -20,7 +20,7 @@ public class SQLLike implements SQLFilter {
 
     @Override
     public String toString() {
-        return getField() + " like ?";
+        return getField() + " IS NOT ?";
     }
 
 }
