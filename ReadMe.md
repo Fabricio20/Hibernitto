@@ -1,4 +1,4 @@
-# PersistEngine [![Build Status](https://ci.notfab.net/job/SpigotMC/job/SimpleConfig/badge/icon)](https://ci.notfab.net/job/SpigotMC/job/SimpleConfig/)
+# PersistEngine [![Build Status](https://ci.notfab.net/job/Libraries/job/PersistEngine/badge/icon)](https://ci.notfab.net/job/Libraries/job/PersistEngine/)
 
 PersistEngine is a persistence library for Hibernate.
 
