@@ -1,14 +1,83 @@
-Usage:
-```java
-public class Example {
-    PersistEngine engine = new PerisistEngine("your.package.on.jpa");
-    
-    public void main(Person person) {
-        pesistengine.refresh(person); // Loads it's data
-        person.setName("some name");
-        engine.persist(person); // Saves the object
-        Person other = engine.get(Person.class, new SQLLike("name", "%Jhon%"));
-        // ^ Loads object with custom filter.
-    }
+# PersistEngine [![Build Status](https://ci.notfab.net/job/SpigotMC/job/SimpleConfig/badge/icon)](https://ci.notfab.net/job/SpigotMC/job/SimpleConfig/)
+
+PersistEngine is a persistence library for Hibernate.
+
+Check versions here: https://maven.notfab.net/Hosted/net/notfab/lib/PersistEngine/
+
+### Installation
+
+**Note**: Requires Hibernate >= 5.2.17
+
+Maven:
+```xml
+<repositories>
+    <repository>
+        <id>NotFab</id>
+        <url>https://maven.notfab.net/Hosted</url>
+    </repository>
+</repositories>
+```
+```xml
+<dependency>
+    <groupId>net.notfab.lib</groupId>
+    <artifactId>PersistEngine</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+Gradle:
+```bash
+repositories {
+    maven { url "https://maven.notfab.net/Hosted" }
 }
 ```
+```bash
+compile group: 'net.notfab.lib', name: 'PersistEngine', version: '1.0.1'
+```
+
+### Usage
+
+```java
+public class Example {
+    
+    private PersistenceFactory persistenceFactory;
+    
+    public Example() {
+        persistenceFactory = new PersistenceFactory("your.persistence.unit.name");
+        // Load entity
+        try (PersistEngine engine = persistenceFactory.getEngine()) {
+            User user = engine.get(User.class, 123); // Get user with id 123
+            user = engine.get(User.class, new SQLEquals("name", "Jhon")); // Gets the first user with name Jhon
+            List<User> users = engine.getList(User.class, new SQLLike("email", "%hotmail%")); // all users with a hotmail
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        // Save (or update) entity
+        try (PersistEngine engine = persistenceFactory.getEngine()) {
+            User user = new User(4, "Jhon", "jhon@example.com");
+            engine.save(user);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        // Reload and Delete entity
+        try (PersistEngine engine = persistenceFactory.getEngine()) { 
+            User user = ...;
+            engine.refresh(user); // Refresh
+            engine.delete(user); // Delete (make sure to delete all relations before!)
+            engine.deatch(user); // Detach
+            engine.unwrap(user); // Unwrap
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+}
+```
+
+### Contributors
+
+- Fabricio20 [Maintainer]
+
+### License
+This project is licensed under the GNU General Public License v3.0, for more information, please check the LICENSE file.

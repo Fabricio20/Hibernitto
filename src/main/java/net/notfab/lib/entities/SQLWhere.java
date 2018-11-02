@@ -1,4 +1,4 @@
-package net.notfab.persistengine.entities;
+package net.notfab.lib.entities;
 
 import javax.persistence.Query;
 import java.util.Arrays;

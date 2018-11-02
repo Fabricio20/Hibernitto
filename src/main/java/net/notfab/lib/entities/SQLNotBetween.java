@@ -1,15 +1,15 @@
-package net.notfab.persistengine.entities;
+package net.notfab.lib.entities;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SQLBetween implements SQLMultiFilter {
+public class SQLNotBetween implements SQLMultiFilter {
 
     private String field;
     private String value1;
     private String value2;
 
-    public SQLBetween(String field, String value1, String value2) {
+    public SQLNotBetween(String field, String value1, String value2) {
         this.field = field;
         this.value1 = value1;
         this.value2 = value2;
@@ -26,7 +26,7 @@ public class SQLBetween implements SQLMultiFilter {
 
     @Override
     public String toString() {
-        return getField() + " between ? AND ?";
+        return getField() + " NOT between ? AND ?";
     }
 
 }

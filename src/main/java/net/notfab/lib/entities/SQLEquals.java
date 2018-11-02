@@ -1,11 +1,11 @@
-package net.notfab.persistengine.entities;
+package net.notfab.lib.entities;
 
-public class SQLNot implements SQLFilter {
+public class SQLEquals implements SQLFilter {
 
     private String field;
     private String value;
 
-    public SQLNot(String field, String value) {
+    public SQLEquals(String field, String value) {
         this.field = field;
         this.value = value;
     }
@@ -20,7 +20,7 @@ public class SQLNot implements SQLFilter {
 
     @Override
     public String toString() {
-        return getField() + " IS NOT ?";
+        return getField() + " = ?";
     }
 
 }

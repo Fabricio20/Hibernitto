@@ -1,9 +1,8 @@
-package net.notfab.persistengine;
+package net.notfab.lib;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.Closeable;
-import java.io.IOException;
 
 public class PersistenceFactory implements Closeable {
 

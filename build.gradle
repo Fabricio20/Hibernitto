@@ -4,11 +4,11 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
 
-group 'net.notfab.persistengine'
-version '1.0'
+group 'net.notfab.lib'
+version '1.0.1'
 description 'Persistence Engine'
 
-sourceCompatibility = targetCompatibility = 10
+sourceCompatibility = targetCompatibility = 1.8
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -51,9 +51,7 @@ publishing {
 
 repositories {
     mavenLocal()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url "http://repo.maven.apache.org/maven2" }
-    maven { url "https://maven.notfab.net/SpigotMC" }
 }
 
 dependencies {

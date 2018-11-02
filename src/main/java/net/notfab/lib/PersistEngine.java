@@ -1,16 +1,14 @@
-package net.notfab.persistengine;
+package net.notfab.lib;
 
-import net.notfab.persistengine.entities.SQLFilter;
-import net.notfab.persistengine.entities.SQLWhere;
+import net.notfab.lib.entities.SQLFilter;
+import net.notfab.lib.entities.SQLWhere;
 import org.hibernate.internal.SessionImpl;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 import java.util.List;
 
-@SuppressWarnings({"WeakerAccess", "unchecked", "SqlDialectInspection"})
+@SuppressWarnings({"WeakerAccess", "unchecked", "SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class PersistEngine implements AutoCloseable {
 
     private EntityManager em;
@@ -21,6 +19,7 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Inserts or updates an object.
+     *
      * @param object The object.
      */
     public boolean persist(Object object) {
@@ -36,9 +35,10 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Fetches a persisted entity from the database.
+     *
      * @param clazz Class of the entity
-     * @param o Filter object(s) or primary key
-     * @param <T> Type
+     * @param o     Filter object(s) or primary key
+     * @param <T>   Type
      * @return Entity from DB
      */
     public <T> T get(Class<T> clazz, Object o) {
@@ -53,9 +53,10 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Fetches a persisted entity from the database.
+     *
      * @param clazz Class of the entity
      * @param where SQLWhere object (filter).
-     * @param <T> Type
+     * @param <T>   Type
      * @return Entity from DB
      */
     public <T> T get(Class<T> clazz, SQLWhere where) {
@@ -69,9 +70,10 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Fetches a persisted entity from the database with filters.
-     * @param clazz Class of the entity
-     * @param filters SQL Filters see {@link net.notfab.persistengine.entities}
-     * @param <T> Type
+     *
+     * @param clazz   Class of the entity
+     * @param filters SQL Filters see {@link net.notfab.lib.entities}
+     * @param <T>     Type
      * @return Persisted entity if found, null otherwise.
      */
     public <T> T get(Class<T> clazz, SQLFilter... filters) {
@@ -88,9 +90,10 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Fetches a list of persisted entities from the database with filters.
+     *
      * @param clazz Class of the entity
      * @param where SQLWhere object (filter).
-     * @param <T> Type
+     * @param <T>   Type
      * @return Persisted list of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, SQLWhere where) {
@@ -104,9 +107,10 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Fetches a list of persisted entities from the database with filters.
-     * @param clazz Class of the entity
-     * @param filters SQL Filters see {@link net.notfab.persistengine.entities}
-     * @param <T> Type
+     *
+     * @param clazz   Class of the entity
+     * @param filters SQL Filters see {@link net.notfab.lib.entities}
+     * @param <T>     Type
      * @return Persisted list of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, SQLFilter... filters) {
@@ -121,10 +125,11 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Deletes an entity from the database.
+     *
      * @param object The entity.
      */
     public void delete(Object object) {
-        if(object == null) return;
+        if (object == null) return;
         em.getTransaction().begin();
         em.remove(em.merge(object));
         em.getTransaction().commit();
@@ -132,10 +137,30 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Refreshes an entity with latest data from the database.
+     *
      * @param o The entity.
      */
     public void refresh(Object o) {
         em.refresh(o);
+    }
+
+    /**
+     * Detaches this entity from the Entitymanager.
+     *
+     * @param o The entity.
+     */
+    public void detach(Object o) {
+        em.detach(o);
+    }
+
+    /**
+     * Unwraps a wrapped entity.
+     *
+     * @param o The entity class.
+     * @return unwrapped entity.
+     */
+    public <T> T unwrap(Class<T> o) {
+        return em.unwrap(o);
     }
 
     /**
