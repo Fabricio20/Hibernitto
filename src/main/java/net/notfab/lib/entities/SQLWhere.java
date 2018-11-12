@@ -16,7 +16,11 @@ public class SQLWhere {
     public String toString() {
         StringBuilder where = new StringBuilder();
         filterList.forEach(q -> {
-            where.append(" AND ").append(q.toString());
+            if(q instanceof SQLLimit) {
+                where.append(" ").append(q.toString());
+            } else {
+                where.append(" AND ").append(q.toString());
+            }
         });
         return where.toString().replaceFirst(" AND ", " where ");
     }
@@ -24,7 +28,13 @@ public class SQLWhere {
     public Query prepare(Query query) {
         final int[] i = {1};
         filterList.forEach(f -> {
-            if (f instanceof SQLMultiFilter) {
+            if (f instanceof SQLLimit) {
+                SQLLimit limit = (SQLLimit) f;
+                for (int value : limit.getValues()) {
+                    query.setParameter(i[0], value);
+                    i[0]++;
+                }
+            } else if (f instanceof SQLMultiFilter) {
                 SQLMultiFilter multi = (SQLMultiFilter) f;
                 for (String value : multi.getValues()) {
                     query.setParameter(i[0], value);
