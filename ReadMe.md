@@ -80,4 +80,4 @@ public class Example {
 - Fabricio20 [Maintainer]
 
 ### License
-This project is licensed under the GNU General Public License v3.0, for more information, please check the LICENSE file.
+This project is licensed under the MIT License, for more information, please check the LICENSE file.
