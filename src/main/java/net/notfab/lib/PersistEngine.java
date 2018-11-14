@@ -91,22 +91,40 @@ public class PersistEngine implements AutoCloseable {
     /**
      * Fetches a list of persisted entities from the database with filters.
      *
-     * @param clazz Class of the entity
-     * @param where SQLWhere object (filter).
-     * @param <T>   Type
+     * @param clazz       Class of the entity
+     * @param firstResult First result
+     * @param maxResults  Max results to return
+     * @param where       SQLWhere object (filter)
+     * @param <T>         Type
      * @return Persisted list of entities if found, null otherwise.
      */
-    public <T> List<T> getList(Class<T> clazz, SQLWhere where) {
+    public <T> List<T> getList(Class<T> clazz, int firstResult, int maxResults, SQLWhere where) {
         String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
         query = where.prepare(query);
-        query.setFirstResult(0);
-        query.setMaxResults(50);
+        query.setFirstResult(firstResult);
+        query.setMaxResults(maxResults);
         return (List<T>) query.getResultList();
     }
 
     /**
      * Fetches a list of persisted entities from the database with filters.
+     * <p>
+     * Note: This has a default limit of 50 results.
+     *
+     * @param clazz Class of the entity
+     * @param where SQLWhere object (filter)
+     * @param <T>   Type
+     * @return Persisted list of entities if found, null otherwise.
+     */
+    public <T> List<T> getList(Class<T> clazz, SQLWhere where) {
+        return getList(clazz, 0, 50, where);
+    }
+
+    /**
+     * Fetches a list of persisted entities from the database with filters.
+     * <p>
+     * Note: This has a default limit of 50 results.
      *
      * @param clazz   Class of the entity
      * @param filters SQL Filters see {@link net.notfab.lib.entities}
@@ -114,13 +132,34 @@ public class PersistEngine implements AutoCloseable {
      * @return Persisted list of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, SQLFilter... filters) {
-        SQLWhere where = new SQLWhere(filters);
-        String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
-        Query query = em.createNativeQuery(queryStr, clazz);
-        query = where.prepare(query);
-        query.setFirstResult(0);
-        query.setMaxResults(50);
-        return (List<T>) query.getResultList();
+        return getList(clazz, 0, 50, filters);
+    }
+
+    /**
+     * Fetches a list of persisted entities from the database with filters.
+     *
+     * @param clazz      Class of the entity
+     * @param maxResults Max results to return
+     * @param filters    SQL Filters see {@link net.notfab.lib.entities}
+     * @param <T>        Type
+     * @return Persisted list of entities if found, null otherwise.
+     */
+    public <T> List<T> getList(Class<T> clazz, int maxResults, SQLFilter... filters) {
+        return getList(clazz, 0, maxResults, filters);
+    }
+
+    /**
+     * Fetches a list of persisted entities from the database with filters.
+     *
+     * @param clazz       Class of the entity
+     * @param firstResult First result
+     * @param maxResults  Max results to return
+     * @param filters     SQL Filters see {@link net.notfab.lib.entities}
+     * @param <T>         Type
+     * @return Persisted list of entities if found, null otherwise.
+     */
+    public <T> List<T> getList(Class<T> clazz, int firstResult, int maxResults, SQLFilter... filters) {
+        return getList(clazz, firstResult, maxResults, new SQLWhere(filters));
     }
 
     /**
