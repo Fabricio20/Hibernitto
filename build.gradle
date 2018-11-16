@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.notfab.lib'
-version '1.1.0'
+version '1.1.1'
 description 'Persistence Engine'
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -51,9 +51,13 @@ publishing {
 
 repositories {
     mavenLocal()
-    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://repo.maven.apache.org/maven2" }
+    maven { url "https://maven.notfab.net/Hosted" }
 }
 
 dependencies {
     compileOnly group: 'org.hibernate', name: 'hibernate-hikaricp', version:'5.2.17.Final'
+
+    // Configuration
+    compileOnly group: 'net.notfab.spigot', name: 'SimpleConfig', version: '1.4.1'
 }
