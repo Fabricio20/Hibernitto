@@ -163,6 +163,25 @@ public class PersistEngine implements AutoCloseable {
     }
 
     /**
+     * Creates a native query via Hibernate.
+     * @param query - The query.
+     * @return Query.
+     */
+    public Query createNativeQuery(String query) {
+        return em.createNativeQuery(query);
+    }
+
+    /**
+     * Creates a native query via Hibernate.
+     * @param query - The query.
+     * @param clazz - The entity.
+     * @return Query.
+     */
+    public Query createNativeQuery(String query, Class<?> clazz) {
+        return em.createNativeQuery(query, clazz);
+    }
+
+    /**
      * Deletes an entity from the database.
      *
      * @param object The entity.
