@@ -4,8 +4,10 @@ import net.notfab.lib.entities.SQLFilter;
 import net.notfab.lib.entities.SQLWhere;
 import org.hibernate.internal.SessionImpl;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.Table;
 import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "unchecked", "SqlDialectInspection", "SqlNoDataSourceInspection"})
@@ -60,7 +62,7 @@ public class PersistEngine implements AutoCloseable {
      * @return Entity from DB
      */
     public <T> T get(Class<T> clazz, SQLWhere where) {
-        String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
+        String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
         where.prepare(query);
         query.setFirstResult(0);
@@ -78,7 +80,7 @@ public class PersistEngine implements AutoCloseable {
      */
     public <T> T get(Class<T> clazz, SQLFilter... filters) {
         SQLWhere where = new SQLWhere(filters);
-        String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
+        String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
         where.prepare(query);
         query.setFirstResult(0);
@@ -99,7 +101,7 @@ public class PersistEngine implements AutoCloseable {
      * @return Persisted list of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, int firstResult, int maxResults, SQLWhere where) {
-        String queryStr = "SELECT * from " + clazz.getSimpleName() + where.toString();
+        String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
         Query query = em.createNativeQuery(queryStr, clazz);
         query = where.prepare(query);
         query.setFirstResult(firstResult);
@@ -164,6 +166,7 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Creates a native query via Hibernate.
+     *
      * @param query - The query.
      * @return Query.
      */
@@ -173,6 +176,7 @@ public class PersistEngine implements AutoCloseable {
 
     /**
      * Creates a native query via Hibernate.
+     *
      * @param query - The query.
      * @param clazz - The entity.
      * @return Query.
@@ -230,6 +234,16 @@ public class PersistEngine implements AutoCloseable {
 
     private boolean isArray(Object obj) {
         return obj != null && obj.getClass().isArray();
+    }
+
+    private String getClassName(Class<?> clazz) {
+        if (clazz.isAnnotationPresent(Table.class)) {
+            Table table = clazz.getDeclaredAnnotation(Table.class);
+            if (!table.name().equals(""))
+                return table.name();
+        }
+        Entity entity = clazz.getDeclaredAnnotation(Entity.class);
+        return entity.name().equals("") ? clazz.getSimpleName() : entity.name();
     }
 
 }
