@@ -30,4 +30,14 @@ public enum Dialect {
         return this == MySQL && dialect == MariaDB || this == MariaDB && dialect == MySQL;
     }
 
+    public String getDatabaseSeparator() {
+        if (this == Dialect.H2) {
+            return ":";
+        } else if(this == Dialect.Oracle) {
+            return "@";
+        } else {
+            return "/";
+        }
+    }
+
 }

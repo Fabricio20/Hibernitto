@@ -83,8 +83,9 @@ public class PersistenceFactoryBuilder {
     public PersistenceFactory build() {
         if (connURL == null) {
             connURL = "jdbc:" + subProtocol
-                    + "://" + ip + ":"
-                    + port + "/" + database
+                    + ":" + ((ip != null) ? "//" + ip : "")
+                    + ((port != 0) ? ":" + port : "")
+                    + dialect.getDatabaseSeparator() + database
                     + "?UseUnicode=true&amp;characterEncoding=utf8";
         }
         Properties properties = new Properties();
