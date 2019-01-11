@@ -1,13 +1,24 @@
 package net.notfab.lib.entities;
 
+import net.notfab.lib.Dialect;
+
 public class SQLLike implements SQLFilter {
 
     private String field;
     private String value;
+    private String not = "";
 
     public SQLLike(String field, String value) {
         this.field = field;
         this.value = value;
+    }
+
+    public SQLLike(boolean equals, String field, String value) {
+        this.field = field;
+        this.value = value;
+        if (!equals) {
+            this.not = " NOT";
+        }
     }
 
     public String getField() {
@@ -19,8 +30,8 @@ public class SQLLike implements SQLFilter {
     }
 
     @Override
-    public String toString() {
-        return getField() + " like ?";
+    public String toString(Dialect dialect) {
+        return getField() + not + " LIKE ?";
     }
 
 }
