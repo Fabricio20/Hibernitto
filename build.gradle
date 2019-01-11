@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.notfab.lib'
-version '1.2'
+version '1.2.1'
 description 'Persistence Engine'
 
 sourceCompatibility = targetCompatibility = 1.8

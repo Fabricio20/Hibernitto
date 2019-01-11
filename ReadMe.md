@@ -21,7 +21,7 @@ Maven:
 <dependency>
     <groupId>net.notfab.lib</groupId>
     <artifactId>PersistEngine</artifactId>
-    <version>2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 Gradle:
@@ -31,7 +31,7 @@ repositories {
 }
 ```
 ```bash
-compile group: 'net.notfab.lib', name: 'PersistEngine', version: '2.0'
+compile group: 'net.notfab.lib', name: 'PersistEngine', version: '1.2.1'
 ```
 
 ### Usage
