@@ -14,9 +14,11 @@ import java.util.List;
 public class PersistEngine implements AutoCloseable {
 
     private EntityManager em;
+    private Dialect dialect;
 
-    protected PersistEngine(EntityManager em) {
+    protected PersistEngine(EntityManager em, Dialect dialect) {
         this.em = em;
+        this.dialect = dialect;
     }
 
     /**
@@ -24,15 +26,10 @@ public class PersistEngine implements AutoCloseable {
      *
      * @param object The object.
      */
-    public boolean persist(Object object) {
-        try {
-            em.getTransaction().begin();
-            ((SessionImpl) em).saveOrUpdate(object);
-            em.getTransaction().commit();
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
+    public void persist(Object object) {
+        em.getTransaction().begin();
+        ((SessionImpl) em).saveOrUpdate(object);
+        em.getTransaction().commit();
     }
 
     /**
@@ -207,7 +204,7 @@ public class PersistEngine implements AutoCloseable {
     }
 
     /**
-     * Detaches this entity from the Entitymanager.
+     * Detaches this entity from the EntityManager.
      *
      * @param o The entity.
      */
