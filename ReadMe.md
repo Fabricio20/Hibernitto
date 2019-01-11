@@ -21,7 +21,7 @@ Maven:
 <dependency>
     <groupId>net.notfab.lib</groupId>
     <artifactId>PersistEngine</artifactId>
-    <version>1.1.3</version>
+    <version>2.0</version>
 </dependency>
 ```
 Gradle:
@@ -31,7 +31,7 @@ repositories {
 }
 ```
 ```bash
-compile group: 'net.notfab.lib', name: 'PersistEngine', version: '1.1.3'
+compile group: 'net.notfab.lib', name: 'PersistEngine', version: '2.0'
 ```
 
 ### Usage
@@ -42,7 +42,14 @@ public class Example {
     private PersistenceFactory persistenceFactory;
     
     public Example() {
+        // With persistence.xml
         persistenceFactory = new PersistenceFactory("your.persistence.unit.name");
+        // With builder
+        persistenceFactory = PersistenceFactory.builder()
+            .setName("MyDatabase")
+            .setIp("127.0.0.1")
+            .setDatabase("test")
+            .build();
         // Load entity
         try (PersistEngine engine = persistenceFactory.getEngine()) {
             User user = engine.get(User.class, 123); // Get user with id 123
@@ -55,7 +62,7 @@ public class Example {
         // Save (or update) entity
         try (PersistEngine engine = persistenceFactory.getEngine()) {
             User user = new User(4, "Jhon", "jhon@example.com");
-            engine.save(user);
+            engine.persist(user);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -67,6 +74,14 @@ public class Example {
             engine.delete(user); // Delete (make sure to delete all relations before!)
             engine.deatch(user); // Detach
             engine.unwrap(user); // Unwrap
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        // Native query (if needed - try avoiding!)
+        try (PersistEngine engine = persistenceFactory.getEngine()) { 
+            engine.createNativeQuery("SELECT * FROM Users");
+            engine.createNativeQuery("SELECT * FROM Users", User.class); // With class
         } catch (Exception ex) {
             ex.printStackTrace();
         }
