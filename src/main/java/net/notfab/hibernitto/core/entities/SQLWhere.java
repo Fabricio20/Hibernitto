@@ -1,6 +1,6 @@
-package net.notfab.lib.entities;
+package net.notfab.hibernitto.core.entities;
 
-import net.notfab.lib.Dialect;
+import net.notfab.hibernitto.core.Dialect;
 
 import javax.persistence.Query;
 import java.util.Arrays;

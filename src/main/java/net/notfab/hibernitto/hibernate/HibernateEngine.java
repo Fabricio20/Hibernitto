@@ -1,23 +1,24 @@
-package net.notfab.lib;
+package net.notfab.hibernitto.hibernate;
 
-import net.notfab.lib.entities.SQLFilter;
-import net.notfab.lib.entities.SQLWhere;
-import org.hibernate.internal.SessionImpl;
+import net.notfab.hibernitto.core.Dialect;
+import net.notfab.hibernitto.core.entities.SQLFilter;
+import net.notfab.hibernitto.core.entities.SQLWhere;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.Table;
 import java.util.List;
 
-@SuppressWarnings({"WeakerAccess", "unchecked", "SqlDialectInspection", "SqlNoDataSourceInspection"})
-public class PersistEngine implements AutoCloseable {
+public class HibernateEngine implements AutoCloseable {
 
-    private EntityManager em;
+    private Session session;
     private Dialect dialect;
 
-    protected PersistEngine(EntityManager em, Dialect dialect) {
-        this.em = em;
+    public HibernateEngine(Session session, Dialect dialect) {
+        this.session = session;
         this.dialect = dialect;
     }
 
@@ -26,14 +27,15 @@ public class PersistEngine implements AutoCloseable {
      *
      * @param object The object.
      */
-    public void persist(Object object) {
-        em.getTransaction().begin();
-        ((SessionImpl) em).saveOrUpdate(object);
-        em.getTransaction().commit();
+    public void save(Object object) {
+        EntityTransaction transaction = session.getTransaction();
+        transaction.begin();
+        session.saveOrUpdate(object);
+        transaction.commit();
     }
 
     /**
-     * Fetches a persisted entity from the database.
+     * Fetches an entity from the database.
      *
      * @param clazz Class of the entity
      * @param o     Filter object(s) or primary key
@@ -44,14 +46,11 @@ public class PersistEngine implements AutoCloseable {
         if (o instanceof SQLWhere) return this.get(clazz, (SQLWhere) o); // SQLWhere
         if (isArray(o)) return this.get(clazz, (SQLFilter[]) o); // Array of SQLFilters
         if (o instanceof SQLFilter) return this.get(clazz, new SQLFilter[]{(SQLFilter) o}); // SQLFilter
-        em.getTransaction().begin();
-        T resp = em.find(clazz, o);
-        em.getTransaction().commit();
-        return resp;
+        return session.find(clazz, o);
     }
 
     /**
-     * Fetches a persisted entity from the database.
+     * Fetches an entity from the database.
      *
      * @param clazz Class of the entity
      * @param where SQLWhere object (filter).
@@ -60,7 +59,7 @@ public class PersistEngine implements AutoCloseable {
      */
     public <T> T get(Class<T> clazz, SQLWhere where) {
         String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
-        Query query = em.createNativeQuery(queryStr, clazz);
+        Query query = session.createNativeQuery(queryStr, clazz);
         where.prepare(query);
         query.setFirstResult(0);
         query.setMaxResults(1);
@@ -68,17 +67,17 @@ public class PersistEngine implements AutoCloseable {
     }
 
     /**
-     * Fetches a persisted entity from the database with filters.
+     * Fetches an entity from the database with filters.
      *
      * @param clazz   Class of the entity
-     * @param filters SQL Filters see {@link net.notfab.lib.entities}
+     * @param filters SQL Filters see {@link net.notfab.hibernitto.core.entities}
      * @param <T>     Type
-     * @return Persisted entity if found, null otherwise.
+     * @return Entity if found, null otherwise.
      */
     public <T> T get(Class<T> clazz, SQLFilter... filters) {
         SQLWhere where = new SQLWhere(filters);
         String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
-        Query query = em.createNativeQuery(queryStr, clazz);
+        Query query = session.createNativeQuery(queryStr, clazz);
         where.prepare(query);
         query.setFirstResult(0);
         query.setMaxResults(1);
@@ -88,18 +87,18 @@ public class PersistEngine implements AutoCloseable {
     // --------------------------------------------------
 
     /**
-     * Fetches a list of persisted entities from the database with filters.
+     * Fetches a list of entities from the database with filters.
      *
      * @param clazz       Class of the entity
      * @param firstResult First result
      * @param maxResults  Max results to return
      * @param where       SQLWhere object (filter)
      * @param <T>         Type
-     * @return Persisted list of entities if found, null otherwise.
+     * @return List of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, int firstResult, int maxResults, SQLWhere where) {
         String queryStr = "SELECT * from " + this.getClassName(clazz) + where.toString();
-        Query query = em.createNativeQuery(queryStr, clazz);
+        Query query = session.createNativeQuery(queryStr, clazz);
         query = where.prepare(query);
         query.setFirstResult(firstResult);
         query.setMaxResults(maxResults);
@@ -107,55 +106,55 @@ public class PersistEngine implements AutoCloseable {
     }
 
     /**
-     * Fetches a list of persisted entities from the database with filters.
+     * Fetches a list of entities from the database with filters.
      * <p>
      * Note: This has a default limit of 50 results.
      *
      * @param clazz Class of the entity
      * @param where SQLWhere object (filter)
      * @param <T>   Type
-     * @return Persisted list of entities if found, null otherwise.
+     * @return List of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, SQLWhere where) {
         return getList(clazz, 0, 50, where);
     }
 
     /**
-     * Fetches a list of persisted entities from the database with filters.
+     * Fetches a list of entities from the database with filters.
      * <p>
      * Note: This has a default limit of 50 results.
      *
      * @param clazz   Class of the entity
-     * @param filters SQL Filters see {@link net.notfab.lib.entities}
+     * @param filters SQL Filters see {@link net.notfab.hibernitto.core.entities}
      * @param <T>     Type
-     * @return Persisted list of entities if found, null otherwise.
+     * @return List of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, SQLFilter... filters) {
         return getList(clazz, 0, 50, filters);
     }
 
     /**
-     * Fetches a list of persisted entities from the database with filters.
+     * Fetches a list of entities from the database with filters.
      *
      * @param clazz      Class of the entity
      * @param maxResults Max results to return
-     * @param filters    SQL Filters see {@link net.notfab.lib.entities}
+     * @param filters    SQL Filters see {@link net.notfab.hibernitto.core.entities}
      * @param <T>        Type
-     * @return Persisted list of entities if found, null otherwise.
+     * @return List of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, int maxResults, SQLFilter... filters) {
         return getList(clazz, 0, maxResults, filters);
     }
 
     /**
-     * Fetches a list of persisted entities from the database with filters.
+     * Fetches a list of entities from the database with filters.
      *
      * @param clazz       Class of the entity
      * @param firstResult First result
      * @param maxResults  Max results to return
-     * @param filters     SQL Filters see {@link net.notfab.lib.entities}
+     * @param filters     SQL Filters see {@link net.notfab.hibernitto.core.entities}
      * @param <T>         Type
-     * @return Persisted list of entities if found, null otherwise.
+     * @return List of entities if found, null otherwise.
      */
     public <T> List<T> getList(Class<T> clazz, int firstResult, int maxResults, SQLFilter... filters) {
         return getList(clazz, firstResult, maxResults, new SQLWhere(filters));
@@ -168,7 +167,7 @@ public class PersistEngine implements AutoCloseable {
      * @return Query.
      */
     public Query createNativeQuery(String query) {
-        return em.createNativeQuery(query);
+        return session.createNativeQuery(query);
     }
 
     /**
@@ -179,7 +178,7 @@ public class PersistEngine implements AutoCloseable {
      * @return Query.
      */
     public Query createNativeQuery(String query, Class<?> clazz) {
-        return em.createNativeQuery(query, clazz);
+        return session.createNativeQuery(query, clazz);
     }
 
     /**
@@ -187,11 +186,12 @@ public class PersistEngine implements AutoCloseable {
      *
      * @param object The entity.
      */
-    public void delete(Object object) {
+    public void remove(Object object) {
         if (object == null) return;
-        em.getTransaction().begin();
-        em.remove(em.merge(object));
-        em.getTransaction().commit();
+        Transaction transaction = session.getTransaction();
+        transaction.begin();
+        session.remove(session.merge(object));
+        transaction.commit();
     }
 
     /**
@@ -200,16 +200,16 @@ public class PersistEngine implements AutoCloseable {
      * @param o The entity.
      */
     public void refresh(Object o) {
-        em.refresh(o);
+        session.refresh(o);
     }
 
     /**
-     * Detaches this entity from the EntityManager.
+     * Detaches this entity from the Session.
      *
      * @param o The entity.
      */
     public void detach(Object o) {
-        em.detach(o);
+        session.detach(o);
     }
 
     /**
@@ -219,14 +219,14 @@ public class PersistEngine implements AutoCloseable {
      * @return unwrapped entity.
      */
     public <T> T unwrap(Class<T> o) {
-        return em.unwrap(o);
+        return session.unwrap(o);
     }
 
     /**
-     * Closes the connection pool and entity manager.
+     * Closes the session.
      */
     public void close() {
-        this.em.close();
+        this.session.close();
     }
 
     private boolean isArray(Object obj) {
@@ -241,6 +241,10 @@ public class PersistEngine implements AutoCloseable {
         }
         Entity entity = clazz.getDeclaredAnnotation(Entity.class);
         return entity.name().equals("") ? clazz.getSimpleName() : entity.name();
+    }
+
+    public Dialect getDialect() {
+        return dialect;
     }
 
 }

@@ -1,4 +1,4 @@
-package net.notfab.lib;
+package net.notfab.hibernitto.core;
 
 public enum Dialect {
 

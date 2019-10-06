@@ -1,12 +1,14 @@
-package net.notfab.lib;
+package net.notfab.hibernitto.jpa;
+
+import net.notfab.hibernitto.core.Dialect;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class PersistenceFactoryBuilder {
+public class JPAFactoryBuilder {
 
-    private String name = "PersistEngine";
+    private String name = "Hibernitto";
     private String database;
     private String username;
     private String password;
@@ -15,72 +17,72 @@ public class PersistenceFactoryBuilder {
     private String connURL;
     private String driver;
     private String subProtocol;
-    private String poolName = "PersistEngine";
+    private String poolName = "Hibernitto";
     private Dialect dialect;
     private Map<String, String> extraProperties = new HashMap<>();
 
-    PersistenceFactoryBuilder(Dialect dialect) {
+    JPAFactoryBuilder(Dialect dialect) {
         this.driver = dialect.getDriver();
         this.subProtocol = dialect.getSubProtocol();
         this.dialect = dialect;
     }
 
-    public PersistenceFactoryBuilder setName(String name) {
+    public JPAFactoryBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
-    public PersistenceFactoryBuilder setDatabase(String database) {
+    public JPAFactoryBuilder setDatabase(String database) {
         this.database = database;
         return this;
     }
 
-    public PersistenceFactoryBuilder setUsername(String username) {
+    public JPAFactoryBuilder setUsername(String username) {
         this.username = username;
         return this;
     }
 
-    public PersistenceFactoryBuilder setPassword(String password) {
+    public JPAFactoryBuilder setPassword(String password) {
         this.password = password;
         return this;
     }
 
-    public PersistenceFactoryBuilder setIp(String ip) {
+    public JPAFactoryBuilder setIp(String ip) {
         this.ip = ip;
         return this;
     }
 
-    public PersistenceFactoryBuilder setPort(int port) {
+    public JPAFactoryBuilder setPort(int port) {
         this.port = port;
         return this;
     }
 
-    public PersistenceFactoryBuilder setConnectionURL(String connectionURL) {
+    public JPAFactoryBuilder setConnectionURL(String connectionURL) {
         this.connURL = connectionURL;
         return this;
     }
 
-    public PersistenceFactoryBuilder setDriver(String driver) {
+    public JPAFactoryBuilder setDriver(String driver) {
         this.driver = driver;
         return this;
     }
 
-    public PersistenceFactoryBuilder setPoolName(String poolName) {
+    public JPAFactoryBuilder setPoolName(String poolName) {
         this.poolName = poolName;
         return this;
     }
 
-    public PersistenceFactoryBuilder setSubprotocol(String subprotocol) {
+    public JPAFactoryBuilder setSubprotocol(String subprotocol) {
         this.subProtocol = subprotocol;
         return this;
     }
 
-    public PersistenceFactoryBuilder addProperty(String name, String value) {
+    public JPAFactoryBuilder addProperty(String name, String value) {
         this.extraProperties.put(name, value);
         return this;
     }
 
-    public PersistenceFactory build() {
+    public JPAFactory build() {
         if (connURL == null) {
             connURL = "jdbc:" + subProtocol
                     + ":" + ((ip != null) ? "//" + ip : "")
@@ -109,7 +111,7 @@ public class PersistenceFactoryBuilder {
             properties.put(entry.getKey(), entry.getValue());
         }
 
-        return new PersistenceFactory(this.name, this.dialect, properties);
+        return new JPAFactory(this.name, this.dialect, properties);
     }
 
 }

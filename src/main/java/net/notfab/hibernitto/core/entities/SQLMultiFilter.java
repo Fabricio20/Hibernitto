@@ -1,4 +1,4 @@
-package net.notfab.lib.entities;
+package net.notfab.hibernitto.core.entities;
 
 import java.util.List;
 
