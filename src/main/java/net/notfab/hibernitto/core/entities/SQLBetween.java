@@ -1,6 +1,6 @@
-package net.notfab.lib.entities;
+package net.notfab.hibernitto.core.entities;
 
-import net.notfab.lib.Dialect;
+import net.notfab.hibernitto.core.Dialect;
 
 import java.util.Arrays;
 import java.util.List;

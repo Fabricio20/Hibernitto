@@ -1,8 +1,8 @@
-# PersistEngine [![Build Status](https://ci.notfab.net/job/Libraries/job/PersistEngine/badge/icon)](https://ci.notfab.net/job/Libraries/job/PersistEngine/)
+# Hibernitto [![Build Status](https://ci.notfab.net/job/Libraries/job/Hibernitto/badge/icon)](https://ci.notfab.net/job/Libraries/job/Hibernitto/)
 
-PersistEngine is a persistence library for Hibernate.
+Hibernitto is a persistence library for Hibernate and Hibernate-JPA.
 
-Check versions here: https://maven.notfab.net/Hosted/net/notfab/lib/PersistEngine/
+Check versions here: https://maven.notfab.net/Hosted/net/notfab/lib/Hibernitto/
 
 ### Installation
 
@@ -20,8 +20,8 @@ Maven:
 ```xml
 <dependency>
     <groupId>net.notfab.lib</groupId>
-    <artifactId>PersistEngine</artifactId>
-    <version>1.2.1</version>
+    <artifactId>Hibernitto</artifactId>
+    <version>2.0</version>
 </dependency>
 ```
 Gradle:
@@ -31,27 +31,64 @@ repositories {
 }
 ```
 ```bash
-compile group: 'net.notfab.lib', name: 'PersistEngine', version: '1.2.1'
+compile group: 'net.notfab.lib', name: 'Hibernitto', version: '2.0'
 ```
 
 ### Usage
 
+Hibernate:
+```java
+public class HibernateUtil {
+
+    // Hibernate SessionFactory
+    private static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            try {
+                StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
+                registryBuilder.applySettings(getSettings());
+                registry = registryBuilder.build();
+
+                MetadataSources sources = new MetadataSources(registry);
+                Set<Class<?>> annotated = new Reflections(scanPackages).getTypesAnnotatedWith(Entity.class);
+                annotated.forEach(sources::addAnnotatedClass);
+    
+                Metadata metadata = sources.getMetadataBuilder().build();
+                sessionFactory = metadata.getSessionFactoryBuilder().build();
+            } catch (Exception ex) {
+                if (registry != null) {
+                    StandardServiceRegistryBuilder.destroy(registry);
+                }
+                logger.error("Error during SessionFactory creation", ex);
+            }
+        }
+        return sessionFactory;
+    }
+
+    // Hibernitto (basically pass the Dialect + a session)
+    public static HibernateEngine getEngine() {
+        return new HibernateEngine(getSessionFactory().openSession(), Dialect.MariaDB);
+    }
+
+}
+```
+
+JPA:
 ```java
 public class Example {
     
-    private PersistenceFactory persistenceFactory;
+    private JPAFactory jpaFactory;
     
     public Example() {
         // With persistence.xml
-        persistenceFactory = new PersistenceFactory("your.persistence.unit.name");
+        jpaFactory = new JPAFactory("your.persistence.unit.name");
         // With builder
-        persistenceFactory = PersistenceFactory.builder()
+        jpaFactory = JPAFactory.builder()
             .setName("MyDatabase")
             .setIp("127.0.0.1")
             .setDatabase("test")
             .build();
         // Load entity
-        try (PersistEngine engine = persistenceFactory.getEngine()) {
+        try (JPAEngine engine = jpaFactory.getEngine()) {
             User user = engine.get(User.class, 123); // Get user with id 123
             user = engine.get(User.class, new SQLEquals("name", "Jhon")); // Gets the first user with name Jhon
             List<User> users = engine.getList(User.class, new SQLLike("email", "%hotmail%")); // all users with a hotmail
@@ -60,18 +97,18 @@ public class Example {
         }
         
         // Save (or update) entity
-        try (PersistEngine engine = persistenceFactory.getEngine()) {
+        try (JPAEngine engine = jpaFactory.getEngine()) {
             User user = new User(4, "Jhon", "jhon@example.com");
-            engine.persist(user);
+            engine.save(user);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         
         // Reload and Delete entity
-        try (PersistEngine engine = persistenceFactory.getEngine()) { 
+        try (JPAEngine engine = jpaFactory.getEngine()) { 
             User user = ...;
             engine.refresh(user); // Refresh
-            engine.delete(user); // Delete (make sure to delete all relations before!)
+            engine.remove(user); // Delete (make sure to delete all relations before!)
             engine.deatch(user); // Detach
             engine.unwrap(user); // Unwrap
         } catch (Exception ex) {
@@ -79,7 +116,7 @@ public class Example {
         }
         
         // Native query (if needed - try avoiding!)
-        try (PersistEngine engine = persistenceFactory.getEngine()) { 
+        try (JPAEngine engine = jpaFactory.getEngine()) { 
             engine.createNativeQuery("SELECT * FROM Users");
             engine.createNativeQuery("SELECT * FROM Users", User.class); // With class
         } catch (Exception ex) {
